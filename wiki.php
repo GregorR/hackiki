@@ -40,29 +40,30 @@ unlink($fsf);
 
 // run the command
 if ($majcmd == "edit") {
-    print "Edit";
+    require_once("lib/edit.php");
+    $outp = performEdit($fsdir, $args);
 } else {
     $outp = polanice($fsdir, $cmd);
+}
 
-    // handle headers
-    if (preg_match("/^headers\n/", $outp)) {
-        // it has headers, send them
-        $outlines = explode("\n", $outp);
-        for ($i = 1; isset($outlines[$i]); $i++) {
-            $l = $outlines[$i];
-            if ($l == "") {
-                // done with headers
-                break;
-            }
-            header($l);
+// handle headers
+if (preg_match("/^headers\n/", $outp)) {
+    // it has headers, send them
+    $outlines = explode("\n", $outp);
+    for ($i = 1; isset($outlines[$i]); $i++) {
+        $l = $outlines[$i];
+        if ($l == "") {
+            // done with headers
+            break;
         }
-
-        // now recombine the output
-        $outp = implode("\n", array_slice($outlines, $i));
+        header($l);
     }
 
-    print $outp;
+    // now recombine the output
+    $outp = implode("\n", array_slice($outlines, $i));
 }
+
+print $outp;
 
 system("rm -rf $fsdir");
 ?>
