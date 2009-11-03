@@ -14,19 +14,21 @@ function polanice($fsdir, $cmd) {
     unlink($tmpf);
 
     $oldpath = $_ENV["PATH"];
-    $_ENV["PATH"] = "/hackiki/bin:/bin:/usr/bin";
+    putenv("PATH=$fsdir/bin:/bin:/usr/bin");
+    putenv("HACKIKI_DIR=$fsdir");
 
     // read the output
-    $cmdh = popen("/usr/bin/pola-run -B $POLA_OPTS -f=/proc -tw /tmp $tmpd -tw /hackiki $fsdir " .
+    $cmdh = popen("/usr/bin/pola-run -B $POLA_OPTS -f=/proc -tw /tmp $tmpd -fw=$fsdir " .
         "--prog=/usr/bin/nice -a=-n10 " .
-        "-e $cmd", "r");
+        "-e $cmd 2>&1", "r");
     $outp = "";
     if ($cmdh !== false) {
         while (!feof($cmdh)) {
             $outp .= fread($cmdh, 8192);
         }
     }
-    $_ENV["PATH"] = $oldpath;
+
+    putenv("PATH=$oldpath");
 
     system("rm -rf $tmpd");
 

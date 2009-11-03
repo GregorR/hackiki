@@ -38,6 +38,10 @@ $fsdir = $fsf . ".d";
 system("hg clone $hackiki_fs_path $fsdir >& /dev/null");
 unlink($fsf);
 
+// and move .hg somewhere safe
+rename("$fsdir/.hg", "$fsdir.hg");
+chdir("$fsdir");
+
 // run the command
 if ($majcmd == "edit") {
     require_once("lib/edit.php");
@@ -65,5 +69,25 @@ if (preg_match("/^headers\n/", $outp)) {
 
 print $outp;
 
-system("rm -rf $fsdir");
+// now commit any changes
+if (!file_exists(".hg")) {
+    rename("$fsdir.hg", ".hg");
+
+    // make 10 attempts
+    print "<pre>";
+    for ($i = 0; $i < 10; $i++) {
+        exec("find . -name '*.orig' | xargs rm -f");
+        exec("hg addremove");
+        //exec("hg commit -m " . escapeshellarg($cmd) . "");
+        exec("hg diff");
+        exec("pwd");
+        exec("hg commit -m -");
+
+        // FIXME: merging
+        exec("hg push 2>&1");
+    }
+    print "</pre>";
+}
+
+system("rm -rf $fsdir $fsdir.hg");
 ?>

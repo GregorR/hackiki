@@ -1,15 +1,12 @@
 <?PHP
 function performEdit($fsdir, $args) {
-    if (!isset($args[0])) {
-        return "Use: edit/<file>";
-    }
-    $fshr = $args[0];
+    global $wiki_base;
 
-    // open the file
-    $fnam = realpath($fsdir . "/bin/" . $fshr);
-    if (substr($fnam, 0, strlen($fsdir)) != $fsdir) {
-        return "Error: Trying to edit a file outside the filesystem.";
+    if (!isset($args[0])) {
+        return "Use: edit/&lt;file&gt;";
     }
+    $fshr = str_replace("..", "", $args[0]);
+    $fnam = $fsdir . "/" . $fshr;
 
     // make sure it's not in .hg
     if (strpos($fnam, "/.hg/") !== false) {
@@ -18,15 +15,33 @@ function performEdit($fsdir, $args) {
 
     // now open it
     $html = "<html><head><title>Edit: $fshr</title></head><body>";
+    if (isset($_REQUEST["cont"]) && isset($_REQUEST["mode"])) {
+        // modify it
+        @mkdir(dirname($fnam), 0777, true);
+        file_put_contents($fnam, str_replace("\r", "", stripslashes($_REQUEST["cont"])));
+        chmod($fnam, intval($_REQUEST["mode"], 8));
+        $html .= "File " . htmlentities($fshr) . " modified.<hr/>";
+    }
+
+    // get the contents and mode
     if (file_exists($fnam)) {
         $fcont = file_get_contents($fnam);
+        $statbuf = stat($fnam);
+        $mode = $statbuf["mode"] & 0777;
     } else {
         $fcont = "";
+        $mode = 0755;
     }
+
     $html .= "<form action=\"$wiki_base/edit/" . htmlentities($fshr) . "\" method=\"post\">" .
-             "<textarea rows=\"25\" cols=\"80\">" .
+             "<h1>" . htmlentities($fshr) . "</h1>" .
+             "<textarea name=\"cont\" rows=\"25\" cols=\"80\">" .
              htmlentities($fcont) .
-             "</textarea></form></body></html>";
+             "</textarea><br/>" .
+             "Mode: <input type=\"text\" name=\"mode\" value=\"" . sprintf("%o", $mode) . "\" /><br/>" .
+             "<input type=\"submit\" /></form>";
+
+    $html .= "</body></html>";
     return $html;
 }
 ?>
