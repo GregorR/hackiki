@@ -43,7 +43,26 @@ unlink($fsf);
 if ($majcmd == "edit") {
     print "Edit";
 } else {
-    polanice($fsdir, $cmd);
+    $outp = polanice($fsdir, $cmd);
+
+    // handle headers
+    if (preg_match("^headers\n", $outp)) {
+        // it has headers, send them
+        $outlines = explode("\n", $outp);
+        for ($i = 1; isset($outlines[$i]); $i++) {
+            $l = $outlines[$i];
+            if ($l == "") {
+                // done with headers
+                break;
+            }
+            header($l);
+        }
+
+        // now recombine the output
+        $outp = implode("\n", array_slice($outlines, $i));
+    }
+
+    print $outp;
 }
 
 system("rm -rf $fsdir");
