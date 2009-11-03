@@ -1,11 +1,11 @@
 <?PHP
 function polanice($fsdir, $cmd) {
-    $POLA_OPTS = ""
+    $POLA_OPTS = "";
     if (file_exists("/lib64")) {
-        $POLA_OPTS="$POLA_OPTS -f=/lib64"
+        $POLA_OPTS="$POLA_OPTS -f=/lib64";
     }
     if (file_exists("/etc/alternatives")) {
-        $POLA_OPTS="$POLA_OPTS -f=/etc/alternatives"
+        $POLA_OPTS="$POLA_OPTS -f=/etc/alternatives";
     }
 
     $tmpf = tempnam("/tmp", "tmpdir.");
