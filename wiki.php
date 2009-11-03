@@ -1,5 +1,4 @@
 <?PHP
-exit(0);
 require_once("lib/config.php");
 require_once("lib/polarun.php");
 
@@ -46,7 +45,7 @@ if ($majcmd == "edit") {
     $outp = polanice($fsdir, $cmd);
 
     // handle headers
-    if (preg_match("^headers\n", $outp)) {
+    if (preg_match("/^headers\n/", $outp)) {
         // it has headers, send them
         $outlines = explode("\n", $outp);
         for ($i = 1; isset($outlines[$i]); $i++) {
