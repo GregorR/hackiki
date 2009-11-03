@@ -35,7 +35,7 @@ $_ENV["WIKI_BASE"] = $wiki_base;
 // clone the fs
 $fsf = tempnam("/tmp", "hackikifs.");
 $fsdir = $fsf . ".d";
-system("hg clone $hackiki_fs_path $fsdir >& /dev/null");
+exec("hg clone $hackiki_fs_path $fsdir");
 unlink($fsf);
 
 // and move .hg somewhere safe
@@ -51,7 +51,7 @@ if ($majcmd == "edit") {
 }
 
 // handle headers
-if (preg_match("/^headers\n/", $outp)) {
+if (substr($outp, 0, 8) == "headers\n") {
     // it has headers, send them
     $outlines = explode("\n", $outp);
     for ($i = 1; isset($outlines[$i]); $i++) {
@@ -64,10 +64,22 @@ if (preg_match("/^headers\n/", $outp)) {
     }
 
     // now recombine the output
-    $outp = implode("\n", array_slice($outlines, $i));
+    $outp = implode("\n", array_slice($outlines, $i+1));
 }
 
 print $outp;
+
+// detach from the user
+function shutdown() {
+    posix_kill(posix_getpid(), SIGHUP);
+}
+if ($pid = pcntl_fork()) exit(0);
+ob_end_clean();
+fclose(STDIN);
+fclose(STDOUT);
+fclose(STDERR);
+register_shutdown_function("shutdown");
+if ($pid = pcntl_fork()) exit(0);
 
 // now commit any changes
 if (!file_exists(".hg")) {
@@ -86,5 +98,5 @@ if (!file_exists(".hg")) {
     print "</pre>";
 }
 
-system("rm -rf $fsdir $fsdir.hg");
+exec("rm -rf $fsdir $fsdir.hg < /dev/null >& /dev/null &");
 ?>
