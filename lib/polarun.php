@@ -15,9 +15,9 @@ function polanice($fsdir, $cmd) {
 
     $oldpath = $_ENV["PATH"];
     $_ENV["PATH"] = "/hackiki/bin:/bin:/usr/bin";
-    passthru("/usr/bin/pola-run -B $POLA_OPTS -f=/proc -tw /tmp $tmpd -tw /hackiki $fsdir \
-        --prog=/usr/bin/nice -a=-n10 \
-        -e $cmd");
+    passthru("/usr/bin/pola-run -B $POLA_OPTS -f=/proc -tw /tmp $tmpd -tw /hackiki $fsdir " .
+        "--prog=/usr/bin/nice -a=-n10 " .
+        "-e $cmd");
     $_ENV["PATH"] = $oldpath;
 
     system("rm -rf $tmpd");
