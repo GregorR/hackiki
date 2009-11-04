@@ -2,11 +2,7 @@
 function performEdit($fsdir, $args) {
     global $wiki_base;
 
-    if (!isset($args[0])) {
-        $fshr = "";
-    } else {
-        $fshr = str_replace("..", "", $args[0]);
-    }
+    $fshr = implode("/", $args);
     $fshre = htmlentities($fshr);
     $fnam = $fsdir . "/" . $fshr;
 
@@ -22,7 +18,13 @@ function performEdit($fsdir, $args) {
             $dirfe = htmlentities($dirf);
             $html .= "<li><a href=\"$wiki_base/edit/$fshre/$dirfe\">$dirfe</a></li>";
         }
-        $html .= "</li>";
+        $html .= "</ul>";
+
+        $html .= "<form action=\"$wiki_base/edit\" method=\"get\">" .
+                 "<input type=\"hidden\" name=\"arg1\" value=\"$fshre\" />" .
+                 "Create new file: <input type=\"text\" name=\"arg2\" />" .
+                 "<input type=\"submit\" value=\"Create\" />" .
+                 "</form>";
 
     } else {
         if (isset($_REQUEST["cont"]) && isset($_REQUEST["mode"])) {
