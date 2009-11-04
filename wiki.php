@@ -17,6 +17,11 @@ if ($slpos !== false) {
     $cmd = escapeshellarg($majcmd);
 }
 
+// use a default command
+if ($majcmd == "") {
+    $majcmd = $cmd = "index";
+}
+
 // get the request arguments
 for ($i = 1;; $i++) {
     if (!isset($_REQUEST["arg" . $i])) {
@@ -28,9 +33,9 @@ for ($i = 1;; $i++) {
 
 // move all the other requests into the environment
 foreach ($_REQUEST as $key => $val) {
-    $_ENV["REQUEST_" . $key] = $val;
+    putenv("REQUEST_$key=$val");
 }
-$_ENV["WIKI_BASE"] = $wiki_base;
+putenv("HACKIKI_BASE=$wiki_base");
 
 // clone the fs
 $fsf = tempnam("/tmp", "hackikifs.");
@@ -73,11 +78,12 @@ print $outp;
 function shutdown() {
     posix_kill(posix_getpid(), SIGHUP);
 }
-if ($pid = pcntl_fork()) exit(0);
 ob_end_clean();
-fclose(STDIN);
-fclose(STDOUT);
-fclose(STDERR);
+flush();
+if ($pid = pcntl_fork()) exit(0);
+@fclose(STDIN);
+@fclose(STDOUT);
+@fclose(STDERR);
 register_shutdown_function("shutdown");
 if ($pid = pcntl_fork()) exit(0);
 

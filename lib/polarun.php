@@ -1,4 +1,6 @@
 <?PHP
+require_once("lib/env.php");
+
 function polanice($fsdir, $cmd) {
     $POLA_OPTS = "";
     if (file_exists("/lib64")) {
@@ -16,6 +18,7 @@ function polanice($fsdir, $cmd) {
     $oldpath = $_ENV["PATH"];
     putenv("PATH=$fsdir/bin:/bin:/usr/bin");
     putenv("HACKIKI_DIR=$fsdir");
+    cleanenv();
 
     // read the output
     $cmdh = popen("/usr/bin/pola-run -B $POLA_OPTS -f=/proc -tw /tmp $tmpd -fw=$fsdir " .

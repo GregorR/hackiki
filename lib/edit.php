@@ -52,6 +52,12 @@ function performEdit($fsdir, $args) {
                  "<input type=\"submit\" /></form>";
     }
 
+    // useful links
+    if (dirname($fshr) == "bin") {
+        $html .= "<a href=\"$wiki_base/" . htmlentities(basename($fshr)) . "\">View this page</a><br/>";
+    }
+    $html .= "<a href=\"$wiki_base\">Wiki index</a><br/>";
+
     $html .= "</body></html>";
     return $html;
 }
