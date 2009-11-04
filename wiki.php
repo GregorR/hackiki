@@ -26,6 +26,7 @@ require_once("lib/polarun.php");
 
 $pi = $_SERVER["PATH_INFO"];
 while ($pi[0] == "/") $pi = substr($pi, 1);
+$log = $pi;
 
 // get directly included argument
 $slpos = strpos($pi, "/");
@@ -51,11 +52,17 @@ for ($i = 1;; $i++) {
     }
     $args[] = $curarg = $_REQUEST["arg" . $i];
     $cmd .= " " . escapeshellarg($curarg);
+    $log .= " " . $curarg;
 }
 
 // move all the other requests into the environment
-foreach ($_REQUEST as $key => $val) {
+foreach ($_GET as $key => $val) {
     putenv("REQUEST_$key=$val");
+    $log .= " $key=$val";
+}
+foreach ($_POST as $key => $val) {
+    putenv("REQUEST_$key=$val");
+    $log .= " $key=$val";
 }
 putenv("HACKIKI_BASE=$wiki_base");
 
@@ -73,6 +80,9 @@ chdir("$fsdir");
 if ($majcmd == "edit") {
     require_once("lib/edit.php");
     $outp = performEdit($fsdir, $args);
+} else if ($majcmd == "hg") {
+    require_once("lib/hg.php");
+    $outp = performHg($fsdir, $args);
 } else {
     $outp = polanice($fsdir, $cmd);
 }
@@ -118,7 +128,7 @@ if (!file_exists(".hg")) {
     for ($i = 0; $i < 10; $i++) {
         exec("find . -name '*.orig' | xargs rm -f");
         exec("hg addremove");
-        exec("hg commit -u Hackiki -m " . escapeshellarg($cmd) . "");
+        exec("hg commit -u Hackiki -m " . escapeshellarg($log) . "");
 
         // FIXME: merging
         exec("hg push 2>&1");
