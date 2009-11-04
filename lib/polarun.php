@@ -2,6 +2,8 @@
 require_once("lib/env.php");
 
 function polanice($fsdir, $cmd) {
+    global $hackiki_path;
+
     $POLA_OPTS = "";
     if (file_exists("/lib64")) {
         $POLA_OPTS="$POLA_OPTS -f=/lib64";
@@ -21,8 +23,10 @@ function polanice($fsdir, $cmd) {
     cleanenv();
 
     // read the output
-    $cmdh = popen("/usr/bin/pola-run -B $POLA_OPTS -f=/proc -tw /tmp $tmpd -fw=$fsdir " .
-        "--prog=/usr/bin/nice -a=-n10 " .
+    $cmdh = popen(
+        "/usr/bin/pola-run -B $POLA_OPTS -f=/proc -tw /tmp $tmpd -fw=$fsdir " .
+        "-f=$hackiki_path/limits --prog=$hackiki_path/limits " .
+        "-fa=/usr/bin/nice -a=-n10 " .
         "-e $cmd 2>&1", "r");
     $outp = "";
     if ($cmdh !== false) {
@@ -33,7 +37,7 @@ function polanice($fsdir, $cmd) {
 
     putenv("PATH=$oldpath");
 
-    system("rm -rf $tmpd");
+    exec("rm -rf $tmpd");
 
     return $outp;
 }
