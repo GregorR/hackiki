@@ -29,7 +29,8 @@ function performEdit($fsdir, $args) {
     $fnam = $fsdir . "/" . $fshr;
 
     // prepare our output
-    $html = "<html><head><title>Edit: $fshr</title></head><body>";
+    $html = "<html><head><title>Edit: $fshr</title>" .
+            "<meta http-equiv=\"Content-type\" value=\"text/html; charset=utf-8\" /></head><body>";
 
     // handle something
     if (is_dir($fnam)) {
