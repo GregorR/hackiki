@@ -85,6 +85,9 @@ if ($majcmd == "edit") {
 } else if ($majcmd == "hg") {
     require_once("lib/hg.php");
     $outp = performHg($fsdir, $args);
+} else if ($majcmd == "license") {
+    require_once("lib/license.php");
+    $outp = performLicense($fsdir, $args);
 } else {
     $outp = polanice($fsdir, $cmd);
 }
