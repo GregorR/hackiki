@@ -18,13 +18,13 @@ function polanice($fsdir, $cmd) {
     unlink($tmpf);
 
     $oldpath = $_ENV["PATH"];
-    putenv("PATH=$fsdir/bin:/bin:/usr/bin");
-    putenv("HACKIKI_DIR=$fsdir");
+    putenv("PATH=/hackiki/bin:/bin:/usr/bin");
     cleanenv();
 
     // read the output
     $cmdh = popen(
-        "/usr/bin/pola-run -B $POLA_OPTS -f=/proc -tw /tmp $tmpd -fw=$fsdir " .
+        "/usr/bin/pola-run -B $POLA_OPTS -f=/proc -tw /tmp $tmpd -tw /hackiki $fsdir " .
+        "--cwd / " .
         "-f=$hackiki_path/limits --prog=$hackiki_path/limits " .
         "-fa=/usr/bin/nice -a=-n10 " .
         "-e $cmd 2>&1", "r");

@@ -96,7 +96,7 @@ if (!file_exists(".hg")) {
     for ($i = 0; $i < 10; $i++) {
         exec("find . -name '*.orig' | xargs rm -f");
         exec("hg addremove");
-        exec("hg commit -m " . escapeshellarg($cmd) . "");
+        exec("hg commit -u Hackiki -m " . escapeshellarg($cmd) . "");
 
         // FIXME: merging
         exec("hg push 2>&1");
