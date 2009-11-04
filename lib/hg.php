@@ -50,7 +50,7 @@ function performHg($fsdir, $args) {
     $html .= "<pre>";
     $ph = popen("hg log -l 10", "r");
     if ($ph !== false) {
-        $html .= stream_get_contents($ph);
+        $html .= htmlentities(stream_get_contents($ph));
         pclose($ph);
     }
     $html .= "</pre>";
