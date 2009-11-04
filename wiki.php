@@ -50,17 +50,19 @@ for ($i = 1;; $i++) {
     if (!isset($_REQUEST["arg" . $i])) {
         break;
     }
-    $args[] = $curarg = $_REQUEST["arg" . $i];
+    $args[] = $curarg = stripslashes($_REQUEST["arg" . $i]);
     $cmd .= " " . escapeshellarg($curarg);
     $log .= " " . $curarg;
 }
 
 // move all the other requests into the environment
 foreach ($_GET as $key => $val) {
+    $val = stripslashes($val);
     putenv("REQUEST_$key=$val");
     $log .= " $key=$val";
 }
 foreach ($_POST as $key => $val) {
+    $val = stripslashes($val);
     putenv("REQUEST_$key=$val");
     $log .= " $key=$val";
 }
