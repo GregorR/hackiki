@@ -135,8 +135,22 @@ if (!file_exists(".hg")) {
         exec("hg addremove");
         exec("hg commit -u Hackiki -m " . escapeshellarg($log) . "");
 
-        // FIXME: merging
-        exec("hg push 2>&1");
+        // try to push
+        $output = array();
+        $retval = 0;
+        exec("hg push 2>&1", $output, $retval);
+        if ($retval) {
+            // failed, try to merge
+            exec("hg heads --template='{node} '", $output);
+            foreach ($output as $h) {
+                exec("hg merge $h");
+                exec("hg commit -m 'branch merge'");
+                exec("hg revert --all");
+                exec("find . -name '*.orig' | xargs rm -f");
+            }
+        } else {
+            break;
+        }
     }
     print "</pre>";
 }
