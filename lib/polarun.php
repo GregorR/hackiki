@@ -45,7 +45,7 @@ function polanice($fsdir, $cmd) {
 
     // read the output
     $cmdh = popen(
-        "/usr/bin/pola-run -B $POLA_OPTS -f=/proc -tw /tmp $tmpd -tw /hackiki $fsdir " .
+        "/usr/bin/pola-run -B $POLA_OPTS -tw /tmp $tmpd -tw /hackiki $fsdir " .
         "--cwd / " .
         "-f=$hackiki_path/limits --prog=$hackiki_path/limits " .
         "-fa=/usr/bin/nice -a=-n10 " .
