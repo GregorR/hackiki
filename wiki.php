@@ -139,7 +139,7 @@ if (!file_exists(".hg")) {
         exec("hg push 2>&1", $output, $retval);
         if ($retval) {
             // failed, try to merge
-            exec("hg heads --template='{node} '", $output);
+            exec("hg heads --template='{node}\n'", $output);
             foreach ($output as $h) {
                 exec("hg merge $h");
                 exec("hg commit -m 'branch merge'");
