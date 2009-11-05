@@ -113,11 +113,10 @@ print $outp;
 
 // detach from the user
 function shutdown() {
-    posix_kill(posix_getpid(), SIGHUP);
+    posix_kill(posix_getpid(), SIGKILL);
 }
 ob_end_clean();
 flush();
-if ($pid = pcntl_fork()) exit(0);
 @fclose(STDIN);
 @fclose(STDOUT);
 @fclose(STDERR);
@@ -129,7 +128,6 @@ if (!file_exists(".hg")) {
     rename("$fsdir.hg", ".hg");
 
     // make 10 attempts
-    print "<pre>";
     for ($i = 0; $i < 10; $i++) {
         exec("find . -name '*.orig' | xargs rm -f");
         exec("hg addremove");
@@ -152,8 +150,7 @@ if (!file_exists(".hg")) {
             break;
         }
     }
-    print "</pre>";
 }
 
-exec("rm -rf $fsdir $fsdir.hg < /dev/null >& /dev/null &");
+exec("rm -rf $fsdir $fsdir.hg");
 ?>
