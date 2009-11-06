@@ -43,7 +43,7 @@ function polanice($fsdir, $cmd) {
     $oldpath = $_ENV["PATH"];
     putenv("PATH=/hackiki/bin:/bin:/usr/bin");
     cleanenv();
-    handleFiles();
+    handleFiles($tmpd);
 
     // read the output
     $cmdh = popen(
