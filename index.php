@@ -1,1 +1,1 @@
-<?PHP header("Location: /wiki/"); ?>
+<?PHP header("Location: wiki/"); ?>
