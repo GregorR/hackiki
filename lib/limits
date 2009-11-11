@@ -1,4 +1,5 @@
 #!/bin/bash
+cd /hackiki
 ulimit -f 10240
 ulimit -l 0
 ulimit -v $(( 128 * 1024 ))
