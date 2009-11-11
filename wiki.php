@@ -37,25 +37,18 @@ if (isset($enable_openid) && $enable_openid) {
     } else if (isset($_REQUEST["openidFinishAuth"])) {
         $auth = openid_finishAuth();
         if ($auth["login"]) {
-            print "<html><head><title>Logged in</title></head><body>" .
-                  "You are now logged in. <a href=\"" . htmlentities(openid_getReturnTo(false)) . "\">Continue</a>." .
-                  "</body></html>";
             $_SESSION["auth"] = $auth;
 
         } else {
             print "<html><head><title>Login failed</title></head><body>" .
                   "Login failed. <a href=\"" . htmlentities(openid_getReturnTo(false)) . "\">Continue</a>." .
                   "</body></html>";
+            exit(0);
 
         }
-        exit(0);
 
     } else if (isset($_REQUEST["openidLogOff"])) {
-        $_SESSION["auth"] = false;
-        print "<html><head><title>Logged off</title></head><body>" .
-              "You are now logged off. <a href=\"" . htmlentities(openid_getReturnTo(false)) . "\">Continue</a>." .
-              "</body></html>";
-        exit(0);
+        $_SESSION["auth"] = $auth = false;
 
     } else {
         if (!isset($_SESSION["auth"])) {
