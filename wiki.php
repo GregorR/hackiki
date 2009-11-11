@@ -180,6 +180,15 @@ if ($pid = pcntl_fork()) exit(0);
 if (!file_exists(".hg")) {
     rename("$fsdir.hg", ".hg");
 
+    $user = "Hackiki";
+    if (isset($enable_openid) && $enable_openid) {
+        if ($auth !== false) {
+            $user = escapeshellarg($auth["short"]);
+        } else {
+            $user = "anonymous";
+        }
+    }
+
     // make 10 attempts
     for ($i = 0; $i < 10; $i++) {
         exec("find . -name '*.orig' | xargs rm -f");
@@ -194,7 +203,7 @@ if (!file_exists(".hg")) {
             if (!checkPermissions(explode("\n", $status))) break;
         }
 
-        exec("hg commit -u Hackiki -m " . escapeshellarg($log) . "");
+        exec("hg commit -u $user -m " . escapeshellarg($log) . "");
 
         // try to push
         $output = array();
