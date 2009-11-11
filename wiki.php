@@ -70,6 +70,7 @@ if (isset($enable_openid) && $enable_openid) {
         putenv("HACKIKI_AUTH_NICKNAME");
     }
 }
+session_write_close();
 
 $pi = $_SERVER["PATH_INFO"];
 while ($pi[0] == "/") $pi = substr($pi, 1);
