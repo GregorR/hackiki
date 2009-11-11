@@ -26,6 +26,7 @@ require_once("lib/polarun.php");
 
 if (isset($enable_openid) && $enable_openid) {
     require_once("lib/openid.php");
+    require_once("lib/permissions.php");
     session_start();
 
     if (isset($_REQUEST["openidTryAuth"])) {
@@ -131,6 +132,9 @@ unlink($fsf);
 rename("$fsdir/.hg", "$fsdir.hg");
 chdir("$fsdir");
 
+// get permissions if applicable
+getPermissions();
+
 // run the command
 if ($majcmd == "edit") {
     require_once("lib/edit.php");
@@ -184,6 +188,16 @@ if (!file_exists(".hg")) {
     for ($i = 0; $i < 10; $i++) {
         exec("find . -name '*.orig' | xargs rm -f");
         exec("hg addremove");
+
+        // if something was touched without permission, ignore this diff
+        if (isset($enable_openid) && $enable_openid) {
+            $ph = popen("hg status | sed 's/^. //'", "r");
+            if ($ph === false) break;
+            $status = stream_get_contents($ph);
+            pclose($ph);
+            if (!checkPermissions(explode("\n", $status))) break;
+        }
+
         exec("hg commit -u Hackiki -m " . escapeshellarg($log) . "");
 
         // try to push

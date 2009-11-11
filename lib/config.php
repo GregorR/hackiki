@@ -3,9 +3,15 @@ $hackiki_path = "/var/lib/hackiki";
 $wiki_base = "/wiki";
 $env_ok = array("PATH", "HACKIKI_BASE");
 $enable_openid = false;
+$openid_administrator = "codu.org";
 
 $hackiki_fs_path = "$hackiki_path/fs";
 if ($enable_openid) {
+    $permissions = array(
+        array("group", "administrators", $openid_administrator),
+        array("file", "etc/permissions", "all", "r"),
+        array("file", "etc/permissions", "administrators", "w")
+    );
     $env_ok[] = "HACKIKI_AUTH_SHORT";
     $env_ok[] = "HACKIKI_AUTH_OPENID";
     $env_ok[] = "HACKIKI_AUTH_NICKNAME";
