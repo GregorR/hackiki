@@ -2,8 +2,14 @@
 $hackiki_path = "/var/lib/hackiki";
 $wiki_base = "/wiki";
 $env_ok = array("PATH", "HACKIKI_BASE");
+$enable_openid = false;
 
 $hackiki_fs_path = "$hackiki_path/fs";
+if ($enable_openid) {
+    $env_ok[] = "HACKIKI_AUTH_SHORT";
+    $env_ok[] = "HACKIKI_AUTH_OPENID";
+    $env_ok[] = "HACKIKI_AUTH_NICKNAME";
+}
 
 $content_license = <<<LICENSE
 Permission is hereby granted, free of charge, to any person obtaining a copy

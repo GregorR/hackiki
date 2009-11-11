@@ -24,6 +24,59 @@
 require_once("lib/config.php");
 require_once("lib/polarun.php");
 
+if (isset($enable_openid) && $enable_openid) {
+    require_once("lib/openid.php");
+    session_start();
+
+    if (isset($_REQUEST["openidTryAuth"])) {
+        openid_tryAuth($_REQUEST["login"], "openidFinishAuth");
+        print "<html><head><title>Logging in...</title></head><body>Logging in...</body></html>";
+        exit(0);
+
+    } else if (isset($_REQUEST["openidFinishAuth"])) {
+        $auth = openid_finishAuth();
+        if ($auth["login"]) {
+            print "<html><head><title>Logged in</title></head><body>" .
+                  "You are now logged in. <a href=\"" . htmlentities(openid_getReturnTo(false)) . "\">Continue</a>." .
+                  "</body></html>";
+            $_SESSION["auth"] = $auth;
+
+        } else {
+            print "<html><head><title>Login failed</title></head><body>" .
+                  "Login failed. <a href=\"" . htmlentities(openid_getReturnTo(false)) . "\">Continue</a>." .
+                  "</body></html>";
+
+        }
+        exit(0);
+
+    } else if (isset($_REQUEST["openidLogOff"])) {
+        $_SESSION["auth"] = false;
+        print "<html><head><title>Logged off</title></head><body>" .
+              "You are now logged off. <a href=\"" . htmlentities(openid_getReturnTo(false)) . "\">Continue</a>." .
+              "</body></html>";
+        exit(0);
+
+    } else {
+        if (!isset($_SESSION["auth"])) {
+            $auth = false;
+        } else {
+            $auth = $_SESSION["auth"];
+        }
+    }
+
+    // now put it in the environment
+    if ($auth !== false) {
+        $auth["short"] = openid_shortURL($auth);
+        putenv("HACKIKI_AUTH_SHORT=" . $auth["short"]);
+        putenv("HACKIKI_AUTH_OPENID=" . $auth["openid"]);
+        putenv("HACKIKI_AUTH_NICKNAME=" . $auth["nickname"]);
+    } else {
+        putenv("HACKIKI_AUTH_SHORT");
+        putenv("HACKIKI_AUTH_OPENID");
+        putenv("HACKIKI_AUTH_NICKNAME");
+    }
+}
+
 $pi = $_SERVER["PATH_INFO"];
 while ($pi[0] == "/") $pi = substr($pi, 1);
 $log = $pi;
