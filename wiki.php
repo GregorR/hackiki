@@ -133,7 +133,9 @@ rename("$fsdir/.hg", "$fsdir.hg");
 chdir("$fsdir");
 
 // get permissions if applicable
-getPermissions();
+if (isset($enable_openid) && $enable_openid) {
+    getPermissions();
+}
 
 // run the command
 if ($majcmd == "edit") {
