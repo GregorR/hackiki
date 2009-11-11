@@ -93,15 +93,23 @@ function openid_getScheme() {
 }
 
 function openid_getReturnTo($append) {
-    $request_uri = $_SERVER['REQUEST_URI'];
-    $ruq = strpos($request_uri, "?");
-    if ($ruq !== false) {
-        $request_uri = substr($request_uri, 0, $ruq);
+    global $openid_return_url;
+
+    if (isset($openid_return_url)) {
+        $url = $openid_return_url . "?";
+    } else {
+        $request_uri = $_SERVER['REQUEST_URI'];
+        $ruq = strpos($request_uri, "?");
+        if ($ruq !== false) {
+            $request_uri = substr($request_uri, 0, $ruq);
+        }
+
+        $url = sprintf("%s://%s:%s%s?",
+                       openid_getScheme(), $_SERVER['SERVER_NAME'],
+                       $_SERVER['SERVER_PORT'],
+                       $request_uri);
     }
-    $url = sprintf("%s://%s:%s%s?",
-                   openid_getScheme(), $_SERVER['SERVER_NAME'],
-                   $_SERVER['SERVER_PORT'],
-                   $request_uri);
+
     foreach ($_REQUEST as $rqkey => $rqval) {
         if (strpos($rqkey, "openid") !== 0 && $rqkey != "PHPSESSID") {
             $url .= urlencode($rqkey) . "=" . urlencode($rqval) . "&";
@@ -114,6 +122,9 @@ function openid_getReturnTo($append) {
 }
 
 function openid_getTrustRoot() {
+    global $openid_return_url;
+    if (isset($openid_return_url)) return $openid_return_url;
+
     $dir = dirname($_SERVER['PHP_SELF']);
     if ($dir != "/") $dir = "/";
     return sprintf("%s://%s:%s%s",
