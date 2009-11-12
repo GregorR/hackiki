@@ -145,6 +145,12 @@ if ($majcmd == "edit") {
     $outp = polanice($fsdir, $cmd);
 }
 
+// if it's too big, cut it down
+$maxsz = 10*1024*1024;
+if (strlen($outp) > $maxsz) {
+    $outp = substr($outp, 0, $maxsz);
+}
+
 // handle headers
 if (substr($outp, 0, 8) == "headers\n") {
     // it has headers, send them
