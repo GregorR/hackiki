@@ -61,13 +61,16 @@ if (isset($enable_openid) && $enable_openid) {
     // now put it in the environment
     if ($auth !== false) {
         $auth["short"] = openid_shortURL($auth);
+        $auth["display"] = openid_humanName($auth, false);
         putenv("HACKIKI_AUTH_SHORT=" . $auth["short"]);
         putenv("HACKIKI_AUTH_OPENID=" . $auth["openid"]);
         putenv("HACKIKI_AUTH_NICKNAME=" . $auth["nickname"]);
+        putenv("HACKIKI_AUTH_DISPLAY=" . $auth["display"]);
     } else {
         putenv("HACKIKI_AUTH_SHORT");
         putenv("HACKIKI_AUTH_OPENID");
         putenv("HACKIKI_AUTH_NICKNAME");
+        putenv("HACKIKI_AUTH_DISPLAY");
     }
 }
 session_write_close();
@@ -189,7 +192,7 @@ if (!file_exists(".hg")) {
     $user = "Hackiki";
     if (isset($enable_openid) && $enable_openid) {
         if ($auth !== false) {
-            $user = escapeshellarg($auth["short"]);
+            $user = escapeshellarg($auth["display"]);
         } else {
             $user = "anonymous";
         }

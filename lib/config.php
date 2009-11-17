@@ -15,6 +15,7 @@ if ($enable_openid) {
     $env_ok[] = "HACKIKI_AUTH_SHORT";
     $env_ok[] = "HACKIKI_AUTH_OPENID";
     $env_ok[] = "HACKIKI_AUTH_NICKNAME";
+    $env_ok[] = "HACKIKI_AUTH_DISPLAY";
 }
 
 $content_license = <<<LICENSE
