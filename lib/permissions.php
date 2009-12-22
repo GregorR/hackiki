@@ -50,7 +50,7 @@ function getPermissions() {
     }
 }
 
-function checkPermissions($touchedFiles) {
+function checkPermissions($script, $touchedFiles) {
     global $permissions, $auth;
 
     $hasPermission = true;
@@ -62,6 +62,7 @@ function checkPermissions($touchedFiles) {
     } else {
         $user[] = "anonymous";
     }
+    $user[] = "#!" . $script;
     foreach ($permissions as $permission) {
         if ($permission[0] == "group") {
             $group = array_slice($permission, 2);

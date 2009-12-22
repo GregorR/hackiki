@@ -209,7 +209,7 @@ if (!file_exists(".hg")) {
             if ($ph === false) break;
             $status = stream_get_contents($ph);
             pclose($ph);
-            if (!checkPermissions(explode("\n", $status))) break;
+            if (!checkPermissions($majcmd, explode("\n", $status))) break;
         }
 
         exec("hg commit -u $user -m " . escapeshellarg($log) . "");
