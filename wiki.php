@@ -154,6 +154,19 @@ if (strlen($outp) > $maxsz) {
     $outp = substr($outp, 0, $maxsz);
 }
 
+// fix up .hg
+if (file_exists(".hg")) die(".hg touched");
+rename("$fsdir.hg", ".hg");
+
+// if something was touched without permission, ignore this diff
+if (isset($enable_openid) && $enable_openid) {
+    $ph = popen("hg status | sed 's/^. //'", "r");
+    if ($ph === false) die("Permission-checking failed, bailing out.");
+    $status = stream_get_contents($ph);
+    pclose($ph);
+    if (!checkPermissions($majcmd, explode("\n", $status))) die("Permission denied.");
+}
+
 // handle headers
 if (substr($outp, 0, 8) == "headers\n") {
     // it has headers, send them
@@ -186,50 +199,37 @@ register_shutdown_function("shutdown");
 if ($pid = pcntl_fork()) exit(0);
 
 // now commit any changes
-if (!file_exists(".hg")) {
-    rename("$fsdir.hg", ".hg");
-
-    $user = "Hackiki";
-    if (isset($enable_openid) && $enable_openid) {
-        if ($auth !== false) {
-            $user = escapeshellarg($auth["display"]);
-        } else {
-            $user = "anonymous";
-        }
+$user = "Hackiki";
+if (isset($enable_openid) && $enable_openid) {
+    if ($auth !== false) {
+        $user = escapeshellarg($auth["display"]);
+    } else {
+        $user = "anonymous";
     }
+}
 
-    // make 10 attempts
-    for ($i = 0; $i < 10; $i++) {
-        exec("find . -name '*.orig' | xargs rm -f");
-        exec("hg addremove");
+// make 10 attempts
+for ($i = 0; $i < 10; $i++) {
+    exec("find . -name '*.orig' | xargs rm -f");
+    exec("hg addremove");
 
-        // if something was touched without permission, ignore this diff
-        if (isset($enable_openid) && $enable_openid) {
-            $ph = popen("hg status | sed 's/^. //'", "r");
-            if ($ph === false) break;
-            $status = stream_get_contents($ph);
-            pclose($ph);
-            if (!checkPermissions($majcmd, explode("\n", $status))) break;
+    exec("hg commit -u $user -m " . escapeshellarg($log) . "");
+
+    // try to push
+    $output = array();
+    $retval = 0;
+    exec("hg push 2>&1", $output, $retval);
+    if ($retval) {
+        // failed, try to merge
+        exec("hg heads --template='{node}\n'", $output);
+        foreach ($output as $h) {
+            exec("hg merge $h");
+            exec("hg commit -m 'branch merge'");
+            exec("hg revert --all");
+            exec("find . -name '*.orig' | xargs rm -f");
         }
-
-        exec("hg commit -u $user -m " . escapeshellarg($log) . "");
-
-        // try to push
-        $output = array();
-        $retval = 0;
-        exec("hg push 2>&1", $output, $retval);
-        if ($retval) {
-            // failed, try to merge
-            exec("hg heads --template='{node}\n'", $output);
-            foreach ($output as $h) {
-                exec("hg merge $h");
-                exec("hg commit -m 'branch merge'");
-                exec("hg revert --all");
-                exec("find . -name '*.orig' | xargs rm -f");
-            }
-        } else {
-            break;
-        }
+    } else {
+        break;
     }
 }
 
