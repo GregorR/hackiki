@@ -145,7 +145,18 @@ if ($majcmd == "edit") {
     require_once("lib/license.php");
     $outp = performLicense($fsdir, $args);
 } else {
-    $outp = polanice($fsdir, $cmd);
+    // see if we can run it
+    if (file_exists("bin/" . $majcmd)) {
+        $outp = polanice($fsdir, $cmd);
+    } else {
+        header($_SERVER["SERVER_PROTOCOL"] . " 404 Not Found");
+        // make this a 404 message
+        if (file_exists("bin/404")) {
+            $outp = polanice($fsdir, "bin/404 " . $cmd);
+        } else {
+            $outp = "404: Page not found";
+        }
+    }
 }
 
 // if it's too big, cut it down
