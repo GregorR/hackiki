@@ -29,7 +29,7 @@ function performLogin($fsdir, $args) {
 
     // if currently logged in, present that
     if (!$enable_openid) {
-        $html .= "This wiki does not have support for OpenID logins.";
+        $html .= "This wiki does not support OpenID logins.";
 
     } else if ($auth !== false) {
         $html .= "You are logged in as " . $auth["display"] . "<br/>" .
