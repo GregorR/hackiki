@@ -94,7 +94,7 @@ if ($slpos !== false) {
 // put the command into the environment
 putenv("HACKIKI_CMD=" . $majcmd);
 putenv("HACKIKI_ARGC=" . (count($args) + 1));
-putenv("HACKIKI_ARG0=bin/" . $majcmd);
+putenv("HACKIKI_ARG0=" . $majcmd);
 $env_ok[] = "HACKIKI_CMD";
 $env_ok[] = "HACKIKI_ARGC";
 $env_ok[] = "HACKIKI_ARG0";
