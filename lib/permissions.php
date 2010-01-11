@@ -72,6 +72,17 @@ function checkPermissions($script, $touchedFiles) {
                     $user[] = $permission[1];
                 }
             }
+
+        } else if ($permission[0] == "regexgroup") {
+            $group = array_slice($permission, 2);
+            foreach ($user as $u) {
+                foreach ($group as $g) {
+                    if (preg_match("@^" . $g . "$@", $u)) {
+                        $user[] = $permission[1];
+                    }
+                }
+            }
+
         }
     }
 
@@ -107,7 +118,7 @@ function checkPermissions($script, $touchedFiles) {
             if ($permission[0] == "file") {
                 if (in_array($permission[2], $user)) {
                     // check if this file matches
-                    if (preg_match("#^" . $permission[1] . "$#", $file)) {
+                    if (preg_match("@^" . $permission[1] . "$@", $file)) {
                         if (strpos($permission[3], "w") !== false) {
                             $filePerm = true;
                         } else {
@@ -119,7 +130,7 @@ function checkPermissions($script, $touchedFiles) {
             } else if ($permission[0] == "script" && $chebang !== false) {
                 if (in_array($permission[2], $user)) {
                     // check if the chebang matches
-                    if (preg_match("#^" . $permission[1] . "$#", $chebang)) {
+                    if (preg_match("@^" . $permission[1] . "$@", $chebang)) {
                         if (strpos($permission[3], "w") !== false) {
                             $scriptPerm = true;
                         } else {
