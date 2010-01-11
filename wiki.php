@@ -91,6 +91,20 @@ if ($slpos !== false) {
     $cmd = escapeshellarg($majcmd);
 }
 
+// put the command into the environment
+putenv("HACKIKI_CMD=" . $majcmd);
+putenv("HACKIKI_ARGC=" . (count($args) + 1));
+putenv("HACKIKI_ARG0=bin/" . $majcmd);
+$env_ok[] = "HACKIKI_CMD";
+$env_ok[] = "HACKIKI_ARGC";
+$env_ok[] = "HACKIKI_ARG0";
+$argi = 1;
+foreach ($args as $arg) {
+    putenv("HACKIKI_ARG" . $argi . "=" . $arg);
+    $env_ok[] = "HACKIKI_ARG" . $argi;
+    $argi++;
+}
+
 // use a default command
 if ($majcmd == "") {
     $majcmd = $cmd = "index";
