@@ -46,6 +46,11 @@ function openid_doIncludes() {
     require_once "Auth/OpenID/SReg.php";
 
     /**
+     * Require the AX extension API.
+     */
+    require_once "Auth/OpenID/AX.php";
+
+    /**
      * Require the PAPE extension module.
      */
     require_once "Auth/OpenID/PAPE.php";
@@ -133,6 +138,10 @@ function openid_getTrustRoot() {
                    $dir);
 }
 
+function openid_mkAttribute($ax_request, $name, $url) {
+    $ax_request->add(Auth_OpenID_AX_AttrInfo::make($url, $name, true, $name));
+}
+
 function openid_tryAuth($openid, $append) {
     $consumer = openid_getConsumer();
 
@@ -148,11 +157,18 @@ function openid_tryAuth($openid, $append) {
                                      // Required
                                      array('nickname'),
                                      // Optional
-                                     array('fullname', 'email'));
+                                     array('firstname', 'fullname', 'email'));
 
     if ($sreg_request) {
         $auth_request->addExtension($sreg_request);
     }
+
+    $ax_request = new Auth_OpenID_AX_FetchRequest();
+    openid_mkAttribute($ax_request, "nickname", "http://axschema.org/namePerson/friendly");
+    openid_mkAttribute($ax_request, "firstname", "http://axschema.org/namePerson/first");
+    openid_mkAttribute($ax_request, "fullname", "http://axschema.org/namePerson");
+    openid_mkAttribute($ax_request, "email", "http://axschema.org/contact/email");
+    $auth_request->addExtension($ax_request);
 
     // Redirect the user to the OpenID server for authentication.
     // Store the token for this authentication so we can verify the
@@ -206,6 +222,7 @@ function openid_finishAuth() {
     $openid = "";
     $nickname = "";
     $sreg = array();
+    $ax = array();
 
     // Check the response status.
     if ($response->status == Auth_OpenID_CANCEL) {
@@ -227,14 +244,27 @@ function openid_finishAuth() {
 
         $sreg_resp = Auth_OpenID_SRegResponse::fromSuccessResponse($response);
         $sreg = $sreg_resp->contents();
+        $ax_resp = new Auth_OpenID_AX_FetchResponse();
+        $ax_resp->fromSuccessResponse($response);
+        $ax = $ax_resp->data;
 
         // nickname we care about in particular
         if (isset($sreg["nickname"])) {
             $nickname = $sreg["nickname"];
+        } else if (isset($ax["nickname"])) {
+            $nickname = $ax["nickname"];
         } else if (isset($sreg["firstname"])) {
             $nickname = $sreg["firstname"];
+        } else if (isset($ax["firstname"])) {
+            $nickname = $ax["firstname"];
         } else if (isset($sreg["fullname"])) {
             $nickname = $sreg["fullname"];
+        } else if (isset($ax["fullname"])) {
+            $nickname = $ax["fullname"];
+        } else if (isset($sreg["email"])) {
+            $nickname = $sreg["email"];
+        } else if (isset($ax["email"])) {
+            $nickname = $ax["email"];
         } else {
             $nickname = $openid;
         }
