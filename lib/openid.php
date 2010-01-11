@@ -244,27 +244,26 @@ function openid_finishAuth() {
 
         $sreg_resp = Auth_OpenID_SRegResponse::fromSuccessResponse($response);
         $sreg = $sreg_resp->contents();
-        $ax_resp = new Auth_OpenID_AX_FetchResponse();
-        $ax_resp->fromSuccessResponse($response);
+        $ax_resp = Auth_OpenID_AX_FetchResponse::fromSuccessResponse($response);
         $ax = $ax_resp->data;
 
         // nickname we care about in particular
         if (isset($sreg["nickname"])) {
             $nickname = $sreg["nickname"];
-        } else if (isset($ax["nickname"])) {
-            $nickname = $ax["nickname"];
+        } else if (isset($ax["http://axschema.org/namePerson/friendly"])) {
+            $nickname = $ax["http://axschema.org/namePerson/friendly"][0];
         } else if (isset($sreg["firstname"])) {
             $nickname = $sreg["firstname"];
-        } else if (isset($ax["firstname"])) {
-            $nickname = $ax["firstname"];
+        } else if (isset($ax["http://axschema.org/namePerson/first"])) {
+            $nickname = $ax["http://axschema.org/namePerson/first"][0];
         } else if (isset($sreg["fullname"])) {
             $nickname = $sreg["fullname"];
-        } else if (isset($ax["fullname"])) {
-            $nickname = $ax["fullname"];
+        } else if (isset($ax["http://axschema.org/namePerson"])) {
+            $nickname = $ax["http://axschema.org/namePerson"][0];
         } else if (isset($sreg["email"])) {
             $nickname = $sreg["email"];
-        } else if (isset($ax["email"])) {
-            $nickname = $ax["email"];
+        } else if (isset($ax["http://axschema.org/contact/email"])) {
+            $nickname = $ax["http://axschema.org/contact/email"][0];
         } else {
             $nickname = $openid;
         }
