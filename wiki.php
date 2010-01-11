@@ -1,6 +1,6 @@
 <?PHP
 /*
- * Copyright (C) 2009 Gregor Richards
+ * Copyright (C) 2009, 2010 Gregor Richards
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -144,6 +144,9 @@ if ($majcmd == "edit") {
 } else if ($majcmd == "license") {
     require_once("lib/license.php");
     $outp = performLicense($fsdir, $args);
+} else if ($majcmd == "login") {
+    require_once("lib/login.php");
+    $outp = performLogin($fsdir, $args);
 } else {
     // see if we can run it
     if (file_exists("bin/" . $majcmd)) {
