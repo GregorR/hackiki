@@ -192,7 +192,14 @@ if (isset($enable_openid) && $enable_openid) {
     if ($ph === false) die("Permission-checking failed, bailing out.");
     $status = stream_get_contents($ph);
     pclose($ph);
-    if (!checkPermissions($majcmd, explode("\n", $status))) die("Permission denied.");
+    if (!checkPermissions($majcmd, explode("\n", $status))) {
+        if ($majcmd != "403" && file_exists("bin/403")) {
+            header("Location: $wiki_base/403");
+            exit(0); die("");
+        } else {
+            die("Permission denied.");
+        }
+    }
 }
 
 // handle headers
