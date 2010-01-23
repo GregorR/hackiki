@@ -148,6 +148,16 @@ if (isset($enable_openid) && $enable_openid) {
     getPermissions();
 }
 
+// and the user
+$user = "Hackiki";
+if (isset($enable_openid) && $enable_openid) {
+    if ($auth !== false) {
+        $user = escapeshellarg($auth["display"]);
+    } else {
+        $user = "anonymous";
+    }
+}
+
 // run the command
 if ($majcmd == "edit") {
     require_once("lib/edit.php");
@@ -234,14 +244,6 @@ register_shutdown_function("shutdown");
 if ($pid = pcntl_fork()) exit(0);
 
 // now commit any changes
-$user = "Hackiki";
-if (isset($enable_openid) && $enable_openid) {
-    if ($auth !== false) {
-        $user = escapeshellarg($auth["display"]);
-    } else {
-        $user = "anonymous";
-    }
-}
 
 // make 10 attempts
 for ($i = 0; $i < 10; $i++) {
@@ -259,7 +261,7 @@ for ($i = 0; $i < 10; $i++) {
         exec("hg heads --template='{node}\n'", $output);
         foreach ($output as $h) {
             exec("hg merge $h");
-            exec("hg commit -m 'branch merge'");
+            exec("hg commit -u $user -m 'branch merge'");
             exec("hg revert --all");
             exec("find . -name '*.orig' | xargs rm -f");
         }

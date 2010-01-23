@@ -22,7 +22,7 @@
  */
 
 function performHg($fsdir, $args) {
-    global $wiki_base;
+    global $wiki_base, $user;
 
     // prepare our output
     $html = "<html><head><title>Hg</title></head><body>";
@@ -34,7 +34,7 @@ function performHg($fsdir, $args) {
         $log = escapeshellarg("hg backout " . $_REQUEST["rev"]);
         $ph = false;
         if ($_REQUEST["act"] == "backout") {
-            $ph = popen("hg backout -r $rev --merge -m $log < /dev/null", "r");
+            $ph = popen("hg backout -u $user -r $rev --merge -m $log < /dev/null", "r");
         } else if ($_REQUEST["act"] == "revert") {
             $ph = popen("hg revert --all -r $rev", "r");
         }
