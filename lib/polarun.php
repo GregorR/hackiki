@@ -34,6 +34,9 @@ function polanice($fsdir, $cmd) {
     if (file_exists("/etc/alternatives")) {
         $POLA_OPTS="$POLA_OPTS -f=/etc/alternatives";
     }
+    if (file_exists("/proc/stat")) {
+        $POLA_OPTS="$POLA_OPTS -f=/proc/stat";
+    }
 
     $tmpf = tempnam("/tmp", "tmpdir.");
     $tmpd = $tmpf . ".d";
