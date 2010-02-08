@@ -44,7 +44,7 @@ function polanice($fsdir, $cmd) {
     unlink($tmpf);
 
     $oldpath = $_ENV["PATH"];
-    putenv("PATH=/hackiki/bin:/bin:/usr/bin");
+    putenv("PATH=/hackiki/bin:/hackiki/usr/bin:/bin:/usr/bin");
     cleanenv();
     handleFiles($tmpd);
 
