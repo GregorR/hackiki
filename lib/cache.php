@@ -46,6 +46,7 @@ function fetchCache() {
     // turn the request into a hash
     $hash = cacheHash();
     $cachedir = $hackiki_path . "/cache/";
+    if (!file_exists($cachedir)) @mkdir($cachedir);
 
     // check if it's cached
     $hfile = $hackiki_path . "/cache/" . $hash . ".r";
@@ -114,11 +115,15 @@ function cacheTouchedFiles() {
 function saveCache($outp, $touched_files) {
     global $hackiki_path;
 
+    // get our cache
+    $cachedir = $hackiki_path . "/cache/";
+    if (!file_exists($cachedir)) @mkdir($cachedir);
+
     $cache = array("output" => $outp, "dependencies" => array());
 
     // turn the request into a hash
     $hash = cacheHash();
-    $hfile = $hackiki_path . "/cache/" . $hash . ".r";
+    $hfile = $cachedir . $hash . ".r";
 
     // mark each dependency
     foreach ($touched_files as $dep) {
@@ -133,10 +138,11 @@ function saveCache($outp, $touched_files) {
 function saveCacheWrite($files) {
     global $hackiki_path;
 
-    $cachepath = $hackiki_path . "/cache/";
+    $cachedir = $hackiki_path . "/cache/";
+    if (!file_exists($cachedir)) @mkdir($cachedir);
 
     foreach ($files as $file) {
-        @touch($cachepath . sha1($file) . ".w");
+        @touch($cachedir . sha1($file) . ".w");
     }
 }
 
