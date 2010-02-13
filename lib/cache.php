@@ -32,7 +32,7 @@ function cacheHash() {
 
     foreach ($env_ok as $ev) {
         $eva = getenv($ev);
-        $cache .= $ev . "=" . $eva . "\n---\n";
+        $cache .= $ev . "=" . base64_encode($eva) . "\n";
     }
 
     // turn that into a hash
