@@ -315,5 +315,10 @@ for ($i = 0; $i < 10; $i++) {
     }
 }
 
+// maybe clean the cache
+if ($hackiki_cache)
+    cleanCache();
+
+// get rid of our files
 exec("rm -rf $fsdir $fsdir.hg");
 ?>
