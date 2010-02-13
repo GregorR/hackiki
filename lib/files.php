@@ -22,13 +22,16 @@
  */
 
 function handleFiles($tmpdir) {
+    global $env_ok;
     $i = 0;
     foreach ($_FILES as $file) {
         $nm = "upload." . $i;
         rename($file["tmp_name"], $tmpdir . "/" . $nm);
         putenv("FILE_$i=" . $file["name"]);
+        $env_ok[] = "FILE_$i";
         $i++;
     }
     putenv("FILES=$i");
+    $env_ok[] = "FILES";
 }
 ?>
