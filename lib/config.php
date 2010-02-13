@@ -1,5 +1,6 @@
 <?PHP
 $hackiki_path = "/var/lib/hackiki";
+$hackiki_cache = true;
 $wiki_base = "/wiki";
 $env_ok = array("PATH", "HACKIKI_BASE");
 $enable_openid = false;
