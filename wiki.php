@@ -23,6 +23,7 @@
 
 require_once("lib/config.php");
 require_once("lib/polarun.php");
+require_once("lib/cache.php");
 
 if (isset($enable_openid) && $enable_openid) {
     require_once("lib/openid.php");
@@ -124,84 +125,119 @@ foreach ($args as $arg) {
 foreach ($_GET as $key => $val) {
     $val = stripslashes($val);
     putenv("REQUEST_$key=$val");
+    $env_ok[] = "REQUEST_$key";
     $log .= " $key=$val";
 }
 foreach ($_POST as $key => $val) {
     $val = stripslashes($val);
     putenv("REQUEST_$key=$val");
+    $env_ok[] = "REQUEST_$key";
     $log .= " $key=$val";
 }
 putenv("HACKIKI_BASE=$wiki_base");
+$env_ok[] = "HACKIKI_BASE";
 
-// clone the fs
-$fsf = tempnam("/tmp", "hackikifs.");
-$fsdir = $fsf . ".d";
-exec("hg clone $hackiki_fs_path $fsdir");
-unlink($fsf);
-
-// and move .hg somewhere safe
-rename("$fsdir/.hg", "$fsdir.hg");
-chdir("$fsdir");
-
-// get permissions if applicable
-if (isset($enable_openid) && $enable_openid) {
-    getPermissions();
-}
-
-// and the user
-$user = "Hackiki";
-if (isset($enable_openid) && $enable_openid) {
-    if ($auth !== false) {
-        $user = escapeshellarg($auth["display"]);
-    } else {
-        $user = "anonymous";
+// handle caching
+if (!isset($hackiki_cache)) $hackiki_cache = true;
+$used_cache = false;
+$write_cache = true;
+$touched_files = array();
+if ($hackiki_cache) {
+    $outp = fetchCache();
+    if ($outp !== false) {
+        $used_cache = true;
     }
+} else {
+    $write_cache = false;
 }
 
-// run the command
-if ($majcmd == "edit") {
-    require_once("lib/edit.php");
-    $outp = performEdit($fsdir, $args);
-} else if ($majcmd == "hg") {
-    require_once("lib/hg.php");
-    $outp = performHg($fsdir, $args);
-} else if ($majcmd == "license") {
-    require_once("lib/license.php");
-    $outp = performLicense($fsdir, $args);
-} else if ($majcmd == "login") {
-    require_once("lib/login.php");
-    $outp = performLogin($fsdir, $args);
-} else {
-    // see if we can run it
-    if (file_exists("bin/" . $majcmd)) {
-        $outp = polanice($fsdir, $cmd);
-    } else {
-        header($_SERVER["SERVER_PROTOCOL"] . " 404 Not Found");
-        // make this a 404 message
-        if (file_exists("bin/404")) {
-            $outp = polanice($fsdir, "bin/404 " . $cmd);
+if (!$used_cache) {
+    // clone the fs
+    $fsf = tempnam("/tmp", "hackikifs.");
+    $fsdir = $fsf . ".d";
+    exec("hg clone $hackiki_fs_path $fsdir");
+    unlink($fsf);
+
+    // and move .hg somewhere safe
+    rename("$fsdir/.hg", "$fsdir.hg");
+    chdir("$fsdir");
+
+    // mark all the files as un-accessed, for caching
+    exec("find . -type f | xargs touch -d '1970-01-01 UTC'");
+
+    // get permissions if applicable
+    if (isset($enable_openid) && $enable_openid) {
+        getPermissions();
+    }
+
+    // and the user
+    $user = "Hackiki";
+    if (isset($enable_openid) && $enable_openid) {
+        if ($auth !== false) {
+            $user = escapeshellarg($auth["display"]);
         } else {
-            $outp = "404: Page not found";
+            $user = "anonymous";
         }
     }
-}
 
-// if it's too big, cut it down
-$maxsz = 10*1024*1024;
-if (strlen($outp) > $maxsz) {
-    $outp = substr($outp, 0, $maxsz);
-}
+    // run the command
+    if ($majcmd == "edit") {
+        require_once("lib/edit.php");
+        $outp = performEdit($fsdir, $args);
+    } else if ($majcmd == "hg") {
+        require_once("lib/hg.php");
+        $outp = performHg($fsdir, $args);
+    } else if ($majcmd == "license") {
+        require_once("lib/license.php");
+        $outp = performLicense($fsdir, $args);
+    } else if ($majcmd == "login") {
+        require_once("lib/login.php");
+        $outp = performLogin($fsdir, $args);
+    } else {
+        // see if we can run it
+        if (file_exists("bin/" . $majcmd)) {
+            $outp = polanice($fsdir, $cmd);
+        } else {
+            header($_SERVER["SERVER_PROTOCOL"] . " 404 Not Found");
+            // make this a 404 message
+            if (file_exists("bin/404")) {
+                $outp = polanice($fsdir, "bin/404 " . $cmd);
+            } else {
+                $outp = "404: Page not found";
+            }
+        }
+    }
 
-// fix up .hg
-if (file_exists(".hg")) die(".hg touched");
-rename("$fsdir.hg", ".hg");
+    // now remember what files we touch
+    if ($hackiki_cache)
+        $touched_files = cacheTouchedFiles();
+
+    // if it's too big, cut it down
+    $maxsz = 10*1024*1024;
+    if (strlen($outp) > $maxsz) {
+        $outp = substr($outp, 0, $maxsz);
+    }
+
+    // fix up .hg
+    if (file_exists(".hg")) die(".hg touched");
+    rename("$fsdir.hg", ".hg");
+}
 
 // if something was touched without permission, ignore this diff
 if (isset($enable_openid) && $enable_openid) {
     $ph = popen("hg status | sed 's/^. //'", "r");
     if ($ph === false) die("Permission-checking failed, bailing out.");
+
     $status = stream_get_contents($ph);
     pclose($ph);
+    $slines = explode("\n", $status);
+
+    // cache this
+    if ($status != "" && $hackiki_cache) {
+        saveCacheWrite($slines);
+        $write_cache = false;
+    }
+
     if (!checkPermissions($majcmd, explode("\n", $status))) {
         if ($majcmd != "403" && file_exists("bin/403")) {
             header("Location: $wiki_base/403");
@@ -211,6 +247,10 @@ if (isset($enable_openid) && $enable_openid) {
         }
     }
 }
+
+// write out the cache
+if ($hackiki_cache && !$used_cache && $write_cache)
+    saveCache($outp, $touched_files);
 
 // handle headers
 if (substr($outp, 0, 8) == "headers\n") {
@@ -230,6 +270,11 @@ if (substr($outp, 0, 8) == "headers\n") {
 }
 
 print $outp;
+
+if ($used_cache) {
+    // nothing left to do
+    exit(0);
+}
 
 // detach from the user
 function shutdown() {
