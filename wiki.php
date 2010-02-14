@@ -139,6 +139,7 @@ $env_ok[] = "HACKIKI_BASE";
 
 // handle caching
 if (!isset($hackiki_cache)) $hackiki_cache = true;
+$hackiki_cache = false; // currently broken
 $used_cache = false;
 $write_cache = true;
 $touched_files = array();
