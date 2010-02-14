@@ -100,7 +100,7 @@ function allFiles($dir) {
 }
 
 // figure out what file we touched
-function cacheTouchedFiles() {
+function cacheTouchedFiles($args) {
     $ret = array();
     $files = allFiles("");
     foreach ($files as $file) {
@@ -108,6 +108,7 @@ function cacheTouchedFiles() {
             $ret[] = $file;
         }
     }
+    $files = array_merge($files, $args);
     return $ret;
 }
 

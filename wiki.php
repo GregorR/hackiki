@@ -139,7 +139,6 @@ $env_ok[] = "HACKIKI_BASE";
 
 // handle caching
 if (!isset($hackiki_cache)) $hackiki_cache = true;
-$hackiki_cache = false; // currently broken
 $used_cache = false;
 $write_cache = true;
 $touched_files = array();
@@ -211,7 +210,7 @@ if (!$used_cache) {
 
     // now remember what files we touch
     if ($hackiki_cache)
-        $touched_files = cacheTouchedFiles();
+        $touched_files = cacheTouchedFiles($args);
 
     // if it's too big, cut it down
     $maxsz = 10*1024*1024;
