@@ -151,6 +151,9 @@ if ($hackiki_cache) {
     $write_cache = false;
 }
 
+// inform of cache usage in the headers
+header("X-Hackiki-Cached: " . ($used_cache ? "Yes" : "No"));
+
 if (!$used_cache) {
     // clone the fs
     $fsf = tempnam("/tmp", "hackikifs.");

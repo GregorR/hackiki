@@ -32,6 +32,5 @@ function handleFiles($tmpdir) {
         $i++;
     }
     putenv("FILES=$i");
-    $env_ok[] = "FILES";
 }
 ?>
