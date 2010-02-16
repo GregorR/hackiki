@@ -33,7 +33,7 @@ hwch() {
 }
 
 # Check dependencies
-DEPS="wget make ar"
+DEPS="wget ar"
 for d in $DEPS
 do
     $d --version >& /dev/null
