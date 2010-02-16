@@ -33,7 +33,7 @@ hwch() {
 }
 
 # Check dependencies
-DEPS="wget make /dev/MAKEDEV ar"
+DEPS="wget make ar"
 for d in $DEPS
 do
     $d --version >& /dev/null
@@ -68,35 +68,27 @@ echo 'Hackiki installer started'
 # get debootstrap
 echo '1) Getting debootstrap'
 
-if [ ! -e /tmp/debootstrap.tar.gz ]
+if [ ! -e /tmp/debootstrap.deb ]
 then
-    wget http://ftp.us.debian.org/debian/pool/main/d/debootstrap/debootstrap_1.0.10lenny1.tar.gz -O /tmp/debootstrap.tar.gz ||
+    wget http://ftp.us.debian.org/debian/pool/main/d/debootstrap/debootstrap_1.0.10lenny1_all.deb -O /tmp/debootstrap.deb ||
         die "Failed to download debootstrap"
 fi
 
 # extract debootstrap
 echo '2) Extracting debootstrap'
-if [ ! -e /tmp/debootstrap/debootstrap*/Makefile ]
-then
-    mkdir -p /tmp/debootstrap
-    tar -C /tmp/debootstrap -zxf /tmp/debootstrap.tar.gz ||
-        die "Failed to extract debootstrap"
-fi
-
-# install debootstrap
-echo '3) Installing debootstrap'
 if [ ! -e /tmp/debootstrap/usr ]
 then
-    cd /tmp/debootstrap/debootstrap*/ ||
-        die "Failed to cd to debootstrap"
-    make &&
-        make install DESTDIR="/tmp/debootstrap" &&
+    mkdir -p /tmp/debootstrap
+    cd /tmp/debootstrap
+    ar x /tmp/debootstrap.deb data.tar.gz &&
+        tar zxf data.tar.gz &&
+        rm -f data.tar.gz &&
         sed 's/\/usr/\/tmp\/debootstrap\/usr/g' -i /tmp/debootstrap/usr/sbin/* ||
         die "Failed to install debootstrap"
 fi
 
 # make the debootstrap
-echo '4) Making the chroot'
+echo '3) Making the chroot'
 if [ ! -e "$HACKIKI_DIR"/etc/debian_version ]
 then
     mkdir -p "$HACKIKI_DIR"
@@ -106,7 +98,7 @@ then
 fi
 
 # set up the chroot
-echo '5) Setting up the chroot'
+echo '4) Setting up the chroot'
 for d in /dev /proc /sys
 do
     umount "$HACKIKI_DIR$d" >& /dev/null
@@ -114,7 +106,7 @@ do
 done
 
 # set up sources.list
-echo '6) Setting up sources.list'
+echo '5) Setting up sources.list'
 if [ ! "`grep 'deb-src' $HACKIKI_DIR/etc/apt/sources.list`" ]
 then
     echo 'deb http://plash.beasts.org/packages debian-lenny/' >> \
@@ -125,12 +117,12 @@ then
 fi
 
 # install deps
-echo '7) Installing prerequisite software'
+echo '6) Installing prerequisite software'
 hchroot aptitude -y install plash lighttpd php5-cgi mercurial php-openid \
                             php5-dev dpkg-dev
 
 # install pcntl
-echo '8) Installing php-pcntl'
+echo '7) Installing php-pcntl'
 if [ ! -e "$HACKIKI_DIR"/usr/lib/php*/*/pcntl.so ]
 then
     echo '#!/bin/bash -x
@@ -149,7 +141,7 @@ then
 fi
 
 # set up lighttpd
-echo '9) Setting up lighttpd'
+echo '8) Setting up lighttpd'
 if [ ! -e "$HACKIKI_DIR"/etc/lighttpd/lighttpd-hackiki-configured ]
 then
     sed 's/^# *"mod_rewrite",/"mod_rewrite",/g' -i "$HACKIKI_DIR"/etc/lighttpd/lighttpd.conf
@@ -170,7 +162,7 @@ then
 fi
 
 # set up hackiki itself
-echo '10) Installing hackiki'
+echo '9) Installing hackiki'
 if [ ! -e "$HACKIKI_DIR"/var/www/wiki.php ]
 then
     hchroot rm -f /var/www/*
@@ -181,7 +173,7 @@ then
 fi
 
 # create the configuration directory
-echo '11) Configuring hackiki'
+echo '10) Configuring hackiki'
 if [ ! -e "$HACKIKI_DIR"/var/lib/hackiki/fs/.hg ]
 then
     hchroot mkdir -p /var/lib/hackiki
@@ -191,7 +183,7 @@ then
 fi
 
 # configure mercurial
-echo '12) Configuring mercurial'
+echo '11) Configuring mercurial'
 if [ ! -e "$HACKIKI_DIR"/var/www/cgi-bin/fshg.cgi ]
 then
     hwch mkdir -p /var/www/cgi-bin
@@ -201,7 +193,7 @@ then
 fi
 
 # set up the scripts to run it
-echo '13) Installing scripts'
+echo '12) Installing scripts'
 if [ ! -e "$HACKIKI_DIR"/start.sh ]
 then
     echo '#!/bin/bash
