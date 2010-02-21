@@ -25,31 +25,6 @@ require_once("lib/config.php");
 require_once("lib/polarun.php");
 require_once("lib/cache.php");
 
-// functions to detach from the user
-function shutdown() {
-    posix_kill(posix_getpid(), SIGKILL);
-}
-
-function detach() {
-    if (pcntl_fork()) {
-        return false;
-    }
-    ob_end_clean();
-    @fclose(STDIN);
-    @fclose(STDOUT);
-    @fclose(STDERR);
-    register_shutdown_function("shutdown");
-/*
-    @posix_setsid();
-    if (pcntl_fork()) {
-        exit(0);
-    }
-    set_time_limit(3600);
-*/
-    return true;
-}
-
-
 if (isset($enable_openid) && $enable_openid) {
     require_once("lib/openid.php");
     require_once("lib/permissions.php");
@@ -180,21 +155,9 @@ if ($hackiki_cache) {
 header("X-Hackiki-Cached: " . ($used_cache ? "Yes" : "No"));
 
 if (!$used_cache) {
-    // get our FS dir
+    // clone the fs
     $fsf = tempnam("/tmp", "hackikifs.");
     $fsdir = $fsf . ".d";
-
-    // be prepared to delete the FS later
-/*
-    if (detach()) {
-        // if all else fails
-        sleep(60);
-        exec("rm -rf $fsdir $fsdir.hg");
-        exit(0);
-    }
-*/
-
-    // clone the fs
     exec("hg clone $hackiki_fs_path $fsdir");
     unlink($fsf);
 
@@ -317,7 +280,16 @@ if ($used_cache) {
 }
 
 // detach from the user
-if (!detach()) exit(0);
+function shutdown() {
+    posix_kill(posix_getpid(), SIGKILL);
+}
+ob_end_clean();
+flush();
+@fclose(STDIN);
+@fclose(STDOUT);
+@fclose(STDERR);
+register_shutdown_function("shutdown");
+if ($pid = pcntl_fork()) exit(0);
 
 // now commit any changes
 
