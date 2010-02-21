@@ -39,11 +39,13 @@ function detach() {
     @fclose(STDOUT);
     @fclose(STDERR);
     register_shutdown_function("shutdown");
+/*
     @posix_setsid();
     if (pcntl_fork()) {
         exit(0);
     }
     set_time_limit(3600);
+*/
     return true;
 }
 
