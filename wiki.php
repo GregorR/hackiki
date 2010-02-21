@@ -183,12 +183,14 @@ if (!$used_cache) {
     $fsdir = $fsf . ".d";
 
     // be prepared to delete the FS later
+/*
     if (detach()) {
         // if all else fails
         sleep(60);
         exec("rm -rf $fsdir $fsdir.hg");
         exit(0);
     }
+*/
 
     // clone the fs
     exec("hg clone $hackiki_fs_path $fsdir");
