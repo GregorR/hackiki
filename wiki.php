@@ -251,9 +251,7 @@ if (isset($enable_openid) && $enable_openid) {
     }
 }
 
-// write out the cache
-if ($hackiki_cache && !$used_cache && $write_cache)
-    saveCache($outp, $touched_files);
+$fulloutp = $outp;
 
 // handle headers
 if (substr($outp, 0, 8) == "headers\n") {
@@ -266,6 +264,15 @@ if (substr($outp, 0, 8) == "headers\n") {
             break;
         }
         header($l);
+
+        // handle X-Hackiki-Cached specially
+        $el = explode(":", $l);
+        if (preg_match("/ *X-Hackiki-Cached */i", $el[0])) {
+            // it's a x-hackiki-cached, see if it's no
+            if (isset($el[1]) && preg_match("/ *no */i", $el[1])) {
+                $write_cache = false;
+            }
+        }
     }
 
     // now recombine the output
@@ -273,6 +280,10 @@ if (substr($outp, 0, 8) == "headers\n") {
 }
 
 print $outp;
+
+// write out the cache
+if ($hackiki_cache && !$used_cache && $write_cache)
+    saveCache($fulloutp, $touched_files);
 
 if ($used_cache) {
     // nothing left to do
