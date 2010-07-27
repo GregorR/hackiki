@@ -191,7 +191,7 @@ function openid_tryAuth($openid, $append) {
     } else {
         // Generate form markup and render it.
         $form_id = 'openid_message';
-        $form_html = $auth_request->htmlMarkup(openid_getTrustRoot(), openid_getReturnTo($append),
+        $form_html = $auth_request->formMarkup(openid_getTrustRoot(), openid_getReturnTo($append),
                                                false, array('id' => $form_id));
 
         // Display an error if the form markup couldn't be generated;
