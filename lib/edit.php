@@ -29,7 +29,7 @@ function performEdit($fsdir, $args) {
     $fnam = $fsdir . "/" . $fshr;
 
     // prepare our output
-    $html = "headers\nX-Hackiki-Cached: no\n\n" .
+    $html = "headers\nX-Hackiki-Cached: No\n\n" .
             "<html><head><title>Edit: $fshr</title>" .
             "<meta http-equiv=\"Content-type\" value=\"text/html; charset=utf-8\" /></head><body>";
 
