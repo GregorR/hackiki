@@ -281,10 +281,6 @@ if (substr($outp, 0, 8) == "headers\n") {
 
 print $outp;
 
-// write out the cache
-if ($hackiki_cache && !$used_cache && $write_cache)
-    saveCache($fulloutp, $touched_files);
-
 if ($used_cache) {
     // nothing left to do
     exit(0);
@@ -301,6 +297,10 @@ flush();
 @fclose(STDERR);
 register_shutdown_function("shutdown");
 if ($pid = pcntl_fork()) exit(0);
+
+// write out the cache
+if ($hackiki_cache && !$used_cache && $write_cache)
+    saveCache($fulloutp, $touched_files);
 
 // now commit any changes
 

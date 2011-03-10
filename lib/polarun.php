@@ -64,7 +64,7 @@ function polanice($fsdir, $cmd) {
 
     putenv("PATH=$oldpath");
 
-    exec("rm -rf $tmpd");
+    exec("nice -n11 rm -rf $tmpd &");
 
     return $outp;
 }
